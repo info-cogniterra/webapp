@@ -6,43 +6,35 @@ import time
 # --- 1. GLOBÁLNÍ KONFIGURACE ---
 st.set_page_config(page_title="RealityGenius | AI Enterprise", page_icon="💎", layout="wide", initial_sidebar_state="collapsed")
 
-# --- 2. PREMIUM CSS (HIGH CONTRAST & GLASSMORPHISM) ---
+# --- 2. PREMIUM CSS (STEJNÝ KVALITNÍ DESIGN) ---
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
 
-    /* HLAVNÍ BAREVNÉ SCHÉMA - TEMNÁ & LUXUSNÍ */
     .stApp {
-        background-color: #050505; /* Téměř černá */
-        background-image: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #050505 70%); /* Decentní modrá záře nahoře */
+        background-color: #050505;
+        background-image: radial-gradient(circle at 50% 0%, #172554 0%, #050505 60%); /* Darker Blue Glow */
         color: #ffffff;
         font-family: 'Inter', sans-serif;
     }
 
-    /* OPRAVA ČITELNOSTI INPUTŮ (ZÁSADNÍ) */
+    /* Inputs styling */
     .stTextInput > div > div > input, 
     .stTextArea > div > div > textarea, 
     .stSelectbox > div > div > div {
-        background-color: #171717 !important; /* Tmavě šedá */
-        color: #ffffff !important; /* Bílý text */
+        background-color: #171717 !important;
+        color: #ffffff !important;
         border: 1px solid #333333;
         border-radius: 8px;
     }
-    .stTextInput > div > div > input:focus {
-        border-color: #3b82f6; /* Modrý focus */
-        box-shadow: 0 0 0 1px #3b82f6;
-    }
     
-    /* TEXTY A NADPISY */
-    h1, h2, h3, p, li, div {
-        color: #ffffff !important;
-    }
-    .subtext {
-        color: #a3a3a3 !important; /* Šedá pro méně důležité texty */
-        font-size: 0.9rem;
-    }
+    /* Text colors */
+    h1, h2, h3, p, li, div { color: #ffffff !important; }
+    .subtext { color: #9ca3af !important; font-size: 0.95rem; line-height: 1.5; }
+    .highlight { color: #60a5fa !important; font-weight: bold; }
+    .strike { text-decoration: line-through; color: #ef4444 !important; }
 
-    /* KARTY (GLASSMORPHISM EFEKT) */
+    /* Cards */
     .glass-card {
         background: rgba(255, 255, 255, 0.03);
         backdrop-filter: blur(10px);
@@ -51,32 +43,36 @@ st.markdown("""
         border-radius: 16px;
         padding: 2rem;
         margin-bottom: 1rem;
+        height: 100%;
+    }
+    
+    /* Comparison Box */
+    .comparison-box {
+        background: #0a0a0a;
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 1.5rem;
     }
 
-    /* TLAČÍTKA */
+    /* Buttons */
     div.stButton > button {
         background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
         color: white !important;
         border: none;
-        padding: 0.6rem 1.2rem;
+        padding: 0.7rem 1.5rem;
         font-weight: 600;
         border-radius: 8px;
         transition: all 0.2s;
+        width: 100%;
     }
-    div.stButton > button:hover {
-        transform: scale(1.02);
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-    }
+    div.stButton > button:hover { transform: scale(1.02); }
     
-    /* SKRYTÍ PRVKŮ STREAMLITU */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    
+    /* Hide Streamlit elements */
+    #MainMenu, footer, header {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
 
-# --- 3. STATE MANAGEMENT ---
+# --- 3. STATE ---
 if 'page' not in st.session_state: st.session_state.page = 'landing'
 if 'auth' not in st.session_state: st.session_state.auth = False
 
@@ -84,69 +80,109 @@ def navigate(page):
     st.session_state.page = page
     st.rerun()
 
-# --- 4. LANDING PAGE (SALES & LEAD GEN) ---
+# --- 4. LANDING PAGE (OBSAHOVĚ VYLADĚNÁ) ---
 def show_landing():
     # NAVBAR
-    c1, c2 = st.columns([5, 1])
-    with c1:
-        st.markdown("### 💎 Cogniterra | RealityGenius")
-    with c2:
-        if st.button("Přihlášení pro klienty"): navigate('login')
-
+    c1, c2 = st.columns([6, 1])
+    with c1: st.markdown("### 💎 RealityGenius | by Cogniterra")
+    with c2: 
+        if st.button("Klientská zóna"): navigate('login')
     st.markdown("---")
 
-    # HERO SEKCE
-    col_text, col_visual = st.columns([1.2, 1])
+    # 1. HERO SEKCE (Silnější Value Prop)
+    col_text, col_visual = st.columns([1.1, 1])
     
     with col_text:
         st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown("# Automatizace realitního marketingu.")
-        st.markdown("<p class='subtext' style='font-size: 1.2rem;'>Nástroj pro elitu v realitách. Přeměňte fotku na virální kampaň během 5 sekund. Šetřete čas, zvyšujte zisky.</p>", unsafe_allow_html=True)
-        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("# Přestaňte psát inzeráty.<br>Začněte prodávat.", unsafe_allow_html=True)
+        st.markdown("""
+        <p class="subtext" style="font-size: 1.2rem; margin-bottom: 20px;">
+        První AI nástroj v ČR, který <span class="highlight">vidí to, co kupující</span>. 
+        Nahrajte fotku a získejte hotový prodejní text, Instagram post a LinkedIn strategii. 
+        <b>Za 5 sekund.</b>
+        </p>
+        """, unsafe_allow_html=True)
         
-        # LEAD GENERATION FORM (ŘEŠENÍ "JAK ZÍSKAT PŘÍSTUP")
+        # HARD DATA (Social Proof)
+        c_a, c_b = st.columns(2)
+        with c_a:
+            st.markdown("✅ **Úspora 12h** / týden")
+        with c_b:
+            st.markdown("✅ **+35 %** vyšší dosah")
+
+        # LEAD GEN FORM
+        st.markdown("<br>", unsafe_allow_html=True)
         with st.container():
             st.markdown("""
-            <div class="glass-card">
-                <h3 style="margin-top:0;">🚀 Požádat o Early Access</h3>
-                <p class="subtext">Přístup je momentálně pouze na pozvánky. Zanechte nám kontakt.</p>
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 20px; border-radius: 10px; border: 1px solid #2563eb;">
+                <h4 style="margin:0;">🚀 Získejte konkurenční výhodu</h4>
+                <p class="subtext" style="font-size:0.9em;">Přístup momentálně na pozvánky. Zadejte email.</p>
             </div>
             """, unsafe_allow_html=True)
-            
-            email = st.text_input("Váš pracovní email", placeholder="např. jan.novak@remax.cz")
-            
-            if st.button("Odeslat žádost o přístup", type="primary"):
-                if email and "@" in email:
-                    st.success(f"Děkujeme. Poptávka odeslána týmu Cogniterra Group. Ozveme se na {email}.")
-                    time.sleep(3)
+            email = st.text_input("Váš pracovní email", placeholder="jan.novak@remax.cz", label_visibility="collapsed")
+            if st.button("Požádat o Early Access", type="primary"):
+                if "@" in email:
+                    st.success("Děkujeme. Váš email byl zařazen do prioritní fronty.")
                 else:
-                    st.warning("Zadejte prosím platný email.")
+                    st.warning("Zadejte platný email.")
 
     with col_visual:
-        # Vizuální ukázka
+        # VIZUÁL "PŘED A PO" (To nejdůležitější)
+        st.markdown("<br>", unsafe_allow_html=True)
         st.markdown("""
-        <div class="glass-card" style="text-align: center; margin-top: 20px;">
-            <div style="color: #3b82f6; font-size: 2rem; margin-bottom: 10px;">✨ AI Engine 3.0</div>
-            <div style="background: #171717; padding: 15px; border-radius: 10px; text-align: left;">
-                <span style="color: #4ade80;">Analyzováno:</span> Penthouse, Praha 1<br>
-                <span style="color: #4ade80;">Cílová skupina:</span> Investoři, Expati<br>
-                <span style="color: #4ade80;">Status:</span> Kampaň vygenerována
+        <div class="glass-card">
+            <h4 style="text-align:center; margin-bottom:20px;">VS. Běžný Makléř vs. RealityGenius</h4>
+            
+            <div class="comparison-box" style="border-left: 3px solid #ef4444; margin-bottom: 15px;">
+                <b style="color: #ef4444;">❌ Člověk (20 minut):</b><br>
+                <span class="subtext">"Prodám pěkný byt 2kk po rekonstrukci. Volejte ihned. RK nevolat."</span>
+            </div>
+            
+            <div class="comparison-box" style="border-left: 3px solid #22c55e;">
+                <b style="color: #22c55e;">✅ RealityGenius AI (3 sekundy):</b><br>
+                <span class="subtext">"🔥 <b>Investiční příležitost na Vinohradech!</b><br>
+                Představte si ranní kávu na terase s výhledem na Prahu. Tento designový loft (65 m²) s italskou dlažbou..."</span>
             </div>
         </div>
         """, unsafe_allow_html=True)
 
-    # FEATURES
+    # 2. PROČ NE CHATGPT? (Řešení námitky)
     st.markdown("<br><br>", unsafe_allow_html=True)
-    c1, c2, c3 = st.columns(3)
-    with c1:
-        st.info("📸 Vizuální AI Analýza")
-        st.markdown("<p class='subtext'>Engine nečte jen text. Vidí fotku, pozná parkety, světlo i atmosféru.</p>", unsafe_allow_html=True)
-    with c2:
-        st.info("✍️ Copywriting na míru")
-        st.markdown("<p class='subtext'>Sreality, Instagram, LinkedIn. Každá platforma dostane jiný, perfektní text.</p>", unsafe_allow_html=True)
-    with c3:
-        st.info("🔒 Enterprise Security")
-        st.markdown("<p class='subtext'>Vaše data a fotky nikam neposíláme. Bezpečnost garantovaná Google Cloud.</p>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align:center'>Proč nestačí ChatGPT?</h2>", unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown("""
+        <div class="glass-card">
+            <h3>👁️ Multimodální Vidění</h3>
+            <p class="subtext">ChatGPT nevidí detaily. Náš engine analyzuje <b>světlo, materiály podlahy a atmosféru</b> přímo z fotky.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with col2:
+        st.markdown("""
+        <div class="glass-card">
+            <h3>🇨🇿 České Reálie</h3>
+            <p class="subtext">Jsme trénováni na datech z <b>Sreality a Bezrealitky</b>. Známe rozdíl mezi "cihlou" a "panelem".</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with col3:
+        st.markdown("""
+        <div class="glass-card">
+            <h3>📈 Virální Strategie 2025</h3>
+            <p class="subtext">Nejen texty. Generujeme <b>hashtagy a scénáře pro Reels</b>, které algoritmy milují.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # 3. ROI KALKULAČKA (Psychologie ceny)
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("""
+    <div style="text-align:center; padding: 40px; border-top: 1px solid #333;">
+        <h2>Kolik stojí váš čas?</h2>
+        <p class="subtext">Průměrný makléř stráví psaním inzerátů a postů 4 hodiny týdně.</p>
+        <h1 style="color: #3b82f6 !important;">Úspora: 16 000 Kč / měsíčně</h1>
+        <p class="subtext">Cena RealityGenius je zlomkem této částky.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
 # --- 5. LOGIN PAGE ---
 def show_login():
@@ -155,124 +191,107 @@ def show_login():
         st.markdown("<br><br>", unsafe_allow_html=True)
         st.markdown("""
         <div class="glass-card">
-            <h2 style="text-align: center;">🔐 Klientský portál</h2>
-            <p class="subtext" style="text-align: center;">Zadejte své přístupové údaje</p>
+            <h2 style="text-align: center;">🔐 Vstup pro partnery</h2>
+            <p class="subtext" style="text-align: center;">Cogniterra Group Enterprise</p>
         </div>
         """, unsafe_allow_html=True)
         
-        username = st.text_input("Uživatelské jméno")
-        password = st.text_input("Heslo", type="password")
+        user = st.text_input("ID Partnera")
+        pwd = st.text_input("Heslo", type="password")
         
-        col_login, col_back = st.columns(2)
-        with col_login:
-            if st.button("Vstoupit", use_container_width=True):
-                if (username == "admin" and password == "cogniterra") or (username == "demo" and password == "demo"):
+        c_log, c_back = st.columns(2)
+        with c_log:
+            if st.button("Přihlásit", use_container_width=True):
+                if (user == "admin" and pwd == "cogniterra") or (user == "demo" and pwd == "demo"):
                     st.session_state.auth = True
                     navigate('app')
                 else:
                     st.error("Neplatné údaje.")
-        with col_back:
+        with c_back:
             if st.button("Zpět", use_container_width=True): navigate('landing')
 
-# --- 6. APP DASHBOARD ---
+# --- 6. APP (THE PRODUCT) ---
 def show_app():
     # HEADER
     c1, c2 = st.columns([8, 1])
-    with c1: st.markdown("## ⚡ RealityGenius | Dashboard")
+    with c1: st.markdown("## ⚡ RealityGenius | Workspace")
     with c2: 
         if st.button("Odhlásit"):
             st.session_state.auth = False
             navigate('landing')
-    
     st.markdown("---")
 
-    # LAYOUT
-    col_left, col_right = st.columns([1, 1.5], gap="large")
+    # HLAVNÍ FUNKCE
+    col_left, col_right = st.columns([1, 1.3], gap="large")
 
     with col_left:
-        st.markdown("#### 1. Konfigurace zakázky")
-        
-        # API KEY SECTION
-        with st.expander("🔑 Nastavení API Klíče (Nutné pro start)", expanded=True):
-            api_key = st.text_input("Google API Key", type="password", placeholder="AIzaSy...")
-            st.markdown("<p class='subtext' style='font-size:0.8em'>Klíč se neukládá, běží pouze v této relaci.</p>", unsafe_allow_html=True)
-
-        st.markdown("#### 2. Vstupní data")
-        uploaded_file = st.file_uploader("Fotografie nemovitosti", type=["jpg", "png", "jpeg"])
+        # API CONFIG
+        with st.expander("⚙️ Aktivace Engine (API Key)", expanded=True):
+            api_key = st.text_input("Vložte klíč", type="password", label_visibility="collapsed", placeholder="Vložte Google API Key")
+            
+        st.markdown("### 1. Zdrojová data")
+        uploaded_file = st.file_uploader("Nahrajte 1 nejlepší fotku", type=["jpg", "png", "jpeg"])
         
         if uploaded_file:
-            st.image(uploaded_file, caption="Preview", use_column_width=True)
+            st.image(uploaded_file, caption="Analýza...", use_column_width=True)
 
     with col_right:
-        st.markdown("#### 3. Zacílení kampaně")
-        
-        with st.container(): # Obaleno v kontejneru pro lepší vzhled
+        st.markdown("### 2. Cílení kampaně")
+        with st.container():
             c_a, c_b = st.columns(2)
             with c_a:
-                typ = st.selectbox("Typ nemovitosti", ["Luxusní Byt", "Rodinný Dům", "Airbnb", "Kancelář", "Pozemek"])
-                lokalita = st.text_input("Lokalita", placeholder="Např. Vinohrady")
+                typ = st.selectbox("Typ nemovitosti", ["Byt na investici", "Rodinný dům", "Luxusní Penthouse", "Komerční prostor"])
+                lokalita = st.text_input("Lokalita", placeholder="Praha 1 - Staré Město")
             with c_b:
-                cena = st.text_input("Cena", placeholder="Např. 12.5 mil CZK")
-                ton = st.selectbox("Tón komunikace", ["Exkluzivní & Emoční", "Věcný & Informativní", "Agresivní & Virální"])
-
-            features = st.text_area("Specifika (oddělte čárkou)", placeholder="Terasa, garáž, po rekonstrukci, výhled...")
+                cena = st.text_input("Cena", placeholder="22.500.000 CZK")
+                ton = st.selectbox("Strategie", ["Emoční (Prodej snu)", "Racionální (Investoři)", "Virální (Gen Z / TikTok)"])
+            
+            features = st.text_area("Klíčové benefity", placeholder="Terasa 20m2, parkování v zakladači, výhled na hrad...")
             
             st.markdown("<br>", unsafe_allow_html=True)
-            generate_btn = st.button("✨ VYGENEROVAT MATERIÁLY", type="primary", use_container_width=True)
+            generate_btn = st.button("✨ GENEROVAT KOMPLETNÍ KAMPAŇ", type="primary", use_container_width=True)
 
         # VÝSTUPY
-        st.markdown("#### 4. Výsledky")
         if generate_btn:
-            if not api_key:
-                st.error("⛔ Chybí API klíč. Vložte jej v sekci vlevo.")
-            elif not uploaded_file:
-                st.warning("⚠️ Nahrajte prosím fotku.")
+            if not api_key or not uploaded_file:
+                st.error("⚠️ Chybí API klíč nebo fotografie.")
             else:
                 genai.configure(api_key=api_key)
-                
-                # Fallback model selection
+                # Model logic
                 model_name = 'gemini-1.5-flash'
                 try:
-                    models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
-                    if models: model_name = models[0]
+                    ms = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
+                    if ms: model_name = ms[0]
                 except: pass
                 
                 model = genai.GenerativeModel(model_name)
                 
-                with st.spinner(f"Analyzuji obrazová data ({model_name})..."):
+                with st.spinner("AI Copywriter tvoří texty..."):
                     try:
                         prompt = f"""
-                        Jsi senior copywriter pro realitní trh (B2C i B2B).
+                        Jsi špičkový realitní marketér.
+                        Analyzuj fotku a vytvoř texty pro: {typ}, {lokalita}, {cena}.
+                        Strategie: {ton}. Benefity: {features}.
                         
-                        VSTUP:
-                        - Typ: {typ}
-                        - Lokalita: {lokalita}
-                        - Cena: {cena}
-                        - Tón: {ton}
-                        - Detaily: {features}
-                        - OBRÁZEK: Analyzuj vizuální styl (světlo, prostor, materiály).
-                        
-                        VÝSTUP (Markdown):
-                        1. "HEADLINE": Úderný nadpis (max 10 slov).
-                        2. "SREALITY": Profesionální popis (cca 150 slov), strukturovaný.
-                        3. "INSTAGRAM": Virální text, emotikony, call-to-action.
-                        4. "HASHTAGS": 15 nejlepších hashtagů pro tento typ nemovitosti v ČR.
+                        Výstup Markdown:
+                        1. **HEADLINE**: (Max 7 slov, úderný)
+                        2. **SREALITY POPIS**: (Strukturovaný, prodejní, 150 slov)
+                        3. **INSTAGRAM CAPTION**: (Včetně emoji, mezer, CTA)
+                        4. **VIRAL TAGS**: (15 hashtagů pro rok 2025)
                         """
                         response = model.generate_content([prompt, Image.open(uploaded_file)])
                         
-                        # Zobrazení v tabech
-                        tab1, tab2 = st.tabs(["📄 Web Inzerát", "📱 Social Media"])
+                        st.markdown("### 🎉 Hotová kampaň")
+                        t1, t2, t3 = st.tabs(["📄 Inzerát", "📱 Social Media", "📋 Strategie"])
                         
-                        with tab1:
-                            st.markdown(response.text)
-                        with tab2:
-                            st.info("Doporučení: K tomuto textu přidejte na Instagramu trending audio.")
-                            st.code(response.text) # Code block pro snadné kopírování
-
+                        with t1: st.markdown(response.text)
+                        with t2: st.code(response.text, language='markdown')
+                        with t3: st.info("Tip: Tento text použijte v kombinaci s 9:16 videem.")
+                        
                     except Exception as e:
-                        st.error(f"Chyba AI Enginu: {e}")
+                        st.error(f"Chyba: {e}")
 
-# --- 7. ROUTING ---
+# --- 7. ROUTER ---
 if st.session_state.page == 'landing': show_landing()
 elif st.session_state.page == 'login': show_login()
 elif st.session_state.page == 'app': 
