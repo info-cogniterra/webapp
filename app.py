@@ -3,201 +3,252 @@ import google.generativeai as genai
 from PIL import Image
 import time
 
-# --- 1. KONFIGURACE STRÁNKY ---
-st.set_page_config(page_title="REALITY GENIUS | Premium AI", page_icon="💎", layout="wide")
+# --- 1. KONFIGURACE A STYLY ---
+st.set_page_config(page_title="RealityGenius AI", page_icon="🏢", layout="wide", initial_sidebar_state="collapsed")
 
-# --- 2. LUXUSNÍ DESIGN (CSS INJECTION) ---
-# Toto změní vzhled celé aplikace na "Dark Premium"
+# MODERNÍ SAAS DESIGN SYSTEM (CSS)
 st.markdown("""
 <style>
-    /* Hlavní pozadí */
-    .stApp {
-        background-color: #0E1117;
-        color: #FAFAFA;
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+    /* Globální nastavení */
+    html, body, [class*="css"] {
+        font-family: 'Inter', sans-serif;
+        color: #1F2937;
+        background-color: #F9FAFB; /* Světlé moderní pozadí */
     }
-    /* Nadpisy */
-    h1, h2, h3 {
-        font-family: 'Playfair Display', serif;
-        color: #D4AF37 !important; /* Zlatá barva */
-        font-weight: 700;
-    }
-    /* Tlačítka */
+
+    /* Odstranění defaultního Streamlit headeru */
+    header {visibility: hidden;}
+    
+    /* Tlačítka - Primary */
     div.stButton > button {
-        background-color: #D4AF37;
-        color: #000000;
+        background-color: #2563EB; /* Moderní modrá */
+        color: white;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
         border: none;
-        padding: 10px 24px;
-        font-weight: bold;
-        transition: all 0.3s ease;
-        border-radius: 5px;
-        width: 100%;
+        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+        transition: all 0.2s;
     }
     div.stButton > button:hover {
-        background-color: #F4CF57;
-        color: #000000;
-        transform: scale(1.02);
+        background-color: #1D4ED8;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 8px -1px rgba(37, 99, 235, 0.3);
     }
-    /* Inputy */
+
+    /* Karty a kontejnery */
+    .css-1r6slb0, .stMarkdown, .stTextInput {
+        background-color: transparent;
+    }
+    
+    /* Input fields styling */
     .stTextInput > div > div > input {
-        background-color: #262730;
-        color: white;
-        border: 1px solid #444;
+        border-radius: 8px;
+        border: 1px solid #E5E7EB;
+        padding: 10px;
+        color: #374151;
     }
-    /* Sidebar */
-    [data-testid="stSidebar"] {
-        background-color: #161A25;
-        border-right: 1px solid #333;
+    
+    /* Custom třídy pro Landing Page */
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        color: #111827;
+        line-height: 1.2;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+    .hero-subtitle {
+        font-size: 1.25rem;
+        color: #6B7280;
+        text-align: center;
+        margin-bottom: 2rem;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .feature-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        border: 1px solid #F3F4F6;
+        text-align: center;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# --- 3. SPRÁVA UŽIVATELŮ (PAYWALL) ---
-# Zde si definujete platící klienty. Formát: "uzivatelske_jmeno": "heslo"
-USERS = {
-    "admin": "cogniterra2025",   # Váš master účet
-    "klient1": "reality123",     # Účet pro prvního klienta
-    "demo": "start"              # Demo účet
-}
+# --- 2. STATE MANAGEMENT (Navigace) ---
+if 'page' not in st.session_state:
+    st.session_state.page = 'landing'
+if 'authenticated' not in st.session_state:
+    st.session_state.authenticated = False
 
-def check_password():
-    """Returns `True` if the user had a correct password."""
+def navigate_to(page):
+    st.session_state.page = page
+    st.rerun()
 
-    def password_entered():
-        """Checks whether a password entered by the user is correct."""
-        if st.session_state["username"] in USERS and st.session_state["password"] == USERS[st.session_state["username"]]:
-            st.session_state["password_correct"] = True
-            del st.session_state["password"]  # Don't store password
-        else:
-            st.session_state["password_correct"] = False
-
-    if "password_correct" not in st.session_state:
-        # First run, show inputs
-        st.markdown("<br><br><br>", unsafe_allow_html=True)
-        st.markdown("<h1 style='text-align: center;'>REALITY GENIUS <span style='color:white; font-size:0.5em;'>AI</span></h1>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align: center; color: #888;'>Exkluzivní nástroj pro realitní profesionály</p>", unsafe_allow_html=True)
-        
-        col1, col2, col3 = st.columns([1,1,1])
-        with col2:
-            st.text_input("Uživatelské jméno", key="username")
-            st.text_input("Heslo", type="password", key="password")
-            st.button("Vstoupit do systému", on_click=password_entered)
-        return False
-    
-    elif not st.session_state["password_correct"]:
-        # Password incorrect, show input + error
-        st.markdown("<br><br><br>", unsafe_allow_html=True)
-        st.markdown("<h1 style='text-align: center;'>REALITY GENIUS</h1>", unsafe_allow_html=True)
-        col1, col2, col3 = st.columns([1,1,1])
-        with col2:
-            st.text_input("Uživatelské jméno", key="username")
-            st.text_input("Heslo", type="password", key="password")
-            st.button("Vstoupit do systému", on_click=password_entered)
-            st.error("⛔ Chybně zadané údaje nebo vypršela licence.")
-        return False
-    
-    else:
-        # Password correct
-        return True
-
-# --- 4. HLAVNÍ APLIKACE ---
-if check_password():
-    # --- SIDEBAR ---
-    st.sidebar.title("💎 NASTAVENÍ")
-    st.sidebar.info(f"Přihlášen: {st.session_state['username']}")
-    
-    # API KEY INPUT
-    api_key = st.sidebar.text_input("Google API Key", type="password", help="Vložte klíč pro aktivaci AI enginu")
-    
-    # DYNAMICKÝ VÝBĚR MODELU
-    selected_model = None
-    if api_key:
-        try:
-            genai.configure(api_key=api_key)
-            available_models = []
-            for m in genai.list_models():
-                if 'generateContent' in m.supported_generation_methods:
-                    available_models.append(m.name)
-            
-            if available_models:
-                default_index = 0
-                for i, model_name in enumerate(available_models):
-                    if "flash" in model_name.lower():
-                        default_index = i
-                        break
-                selected_model_name = st.sidebar.selectbox("AI Model Engine", available_models, index=default_index)
-                selected_model = selected_model_name 
-            else:
-                st.sidebar.error("Klíč je platný, ale nebyly nalezeny modely.")
-        except Exception as e:
-            st.sidebar.error(f"Chyba API klíče: {e}")
-
-    if st.sidebar.button("Odhlásit se"):
-        st.session_state["password_correct"] = False
-        st.rerun()
-
-    # --- WORKSPACE ---
-    st.title("Nová zakázka")
-    st.markdown("---")
-
-    col1, col2 = st.columns([1, 1.2])
-
+# --- 3. LANDING PAGE ---
+def show_landing_page():
+    # Navbar placeholder
+    col1, col2 = st.columns([6, 1])
     with col1:
-        st.markdown("### 1. Vizuální vstup")
-        uploaded_file = st.file_uploader("Nahrajte fotografii nemovitosti", type=["jpg", "jpeg", "png"])
-        if uploaded_file is not None:
-            image = Image.open(uploaded_file)
-            st.image(image, caption='Náhled', use_column_width=True)
-
+        st.markdown("### **🏢 RealityGenius.ai**")
     with col2:
-        st.markdown("### 2. Parametry inzerátu")
-        typ_nemovitosti = st.selectbox("Typ nemovitosti", ["Luxusní Byt", "Rodinný Dům", "Penthouse", "Komerční prostor", "Airbnb Investice"])
-        lokalita = st.text_input("Lokalita", placeholder="např. Pařížská, Praha 1")
-        cena = st.text_input("Cena", placeholder="např. 25.000.000 CZK")
-        styl_komunikace = st.select_slider("Tón komunikace", options=["Formální", "Profesionální", "Emoční", "Virální/Agresivní"])
-        klicove_vlastnosti = st.text_area("Detaily a benefity", placeholder="Terasa, výhled na hrad, parkování v garáži, smart home...")
+        if st.button("Přihlásit se"):
+            navigate_to('login')
+
+    st.markdown("---")
+    
+    # Hero Section
+    st.markdown('<div class="hero-title">Automatizujte prodej nemovitostí<br>pomocí umělé inteligence</div>', unsafe_allow_html=True)
+    st.markdown('<div class="hero-subtitle">Vytvářejte virální inzeráty, Instagram posty a LinkedIn analýzy z jediné fotografie. Ušetřete 90 % času a prodávejte rychleji.</div>', unsafe_allow_html=True)
+    
+    # CTA
+    c1, c2, c3 = st.columns([1, 1, 1])
+    with c2:
+        if st.button("Vyzkoušet demo zdarma", type="primary", use_container_width=True):
+            navigate_to('login')
+
+    st.markdown("<br><br>", unsafe_allow_html=True)
+
+    # Features Section
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.markdown("""
+        <div class="feature-card">
+            <h3>📸 Vizuální Analýza</h3>
+            <p>AI vidí to, co kupující. Detekuje materiály, světlo a atmosféru z fotky.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with c2:
+        st.markdown("""
+        <div class="feature-card">
+            <h3>✍️ Copywriting 3.0</h3>
+            <p>Texty, které prodávají. Od emocí na Instagramu po fakta na Sreality.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with c3:
+        st.markdown("""
+        <div class="feature-card">
+            <h3>🚀 Virální Dosah</h3>
+            <p>Automatický výběr nejlepších hashtagů a strategií pro rok 2025.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+# --- 4. LOGIN PAGE ---
+def show_login_page():
+    c1, c2, c3 = st.columns([1, 2, 1])
+    with c2:
+        st.markdown("<br><br>", unsafe_allow_html=True)
+        with st.container(border=True):
+            st.markdown("### 👋 Vítejte zpět")
+            st.markdown("Přihlaste se do svého klientského účtu.")
+            
+            username = st.text_input("Email")
+            password = st.text_input("Heslo", type="password")
+            
+            if st.button("Vstoupit do aplikace", use_container_width=True):
+                # HARDCODED AUTH (Pro MVP stačí)
+                if (username == "admin" and password == "cogniterra") or (username == "demo" and password == "demo"):
+                    st.session_state.authenticated = True
+                    st.session_state.username = username
+                    navigate_to('app')
+                else:
+                    st.error("Nesprávné údaje. (Zkuste: admin / cogniterra)")
+            
+            st.markdown("<div style='text-align: center; color: #666; margin-top: 10px;'>Nemáte účet? Kontaktujte Cogniterra Group.</div>", unsafe_allow_html=True)
         
-        st.write("") # Spacing
-        generate_btn = st.button("✨ GENEROVAT MARKETINGOVÉ MATERIÁLY", type="primary")
+        if st.button("← Zpět na web", type="secondary"):
+            navigate_to('landing')
 
-    # --- VÝSTUP ---
-    if generate_btn:
-        if not api_key or not selected_model or not uploaded_file:
-            st.warning("⚠️ Pro generování vyplňte API klíč a nahrajte fotografii.")
-        else:
-            genai.configure(api_key=api_key)
-            model = genai.GenerativeModel(selected_model)
+# --- 5. APP INTERFACE (Samotný produkt) ---
+def show_app_page():
+    # Header Appky
+    sidebar = st.sidebar
+    sidebar.title("⚙️ Nastavení")
+    api_key = sidebar.text_input("Google API Key", type="password")
+    
+    if sidebar.button("Odhlásit se"):
+        st.session_state.authenticated = False
+        navigate_to('landing')
 
-            with st.spinner('AI Copywriter pracuje na textu...'):
-                try:
-                    prompt = f"""
-                    Jsi špičkový realitní makléř a copywriter pro luxusní segment.
-                    Tón komunikace: {styl_komunikace}.
-                    
-                    Zadání:
-                    1. Analyzuj přiložený obrázek (interiér/exteriér, světlo, materiály).
-                    2. Vytvoř prodejní texty pro: {typ_nemovitosti}, lokalita {lokalita}, cena {cena}.
-                    3. Zahrň tyto benefity: {klicove_vlastnosti}.
-                    
-                    Výstup formátuj v Markdownu:
-                    
-                    ## ⚜️ EXKLUZIVNÍ INZERÁT (Web)
-                    (Headline, Poutavý úvod, Detailní popis atmosféry, Call to Action)
-                    
-                    ## 📱 INSTAGRAM & TIKTOK (Virální)
-                    (Krátký, úderný text, zaměřený na "fear of missing out" a luxus)
-                    
-                    ## 💼 LINKEDIN (Investiční)
-                    (Analytičtější pohled, vhodnost investice, ROI potenciál)
-                    
-                    ## #️⃣ HASHTAGY
-                    (Vypiš 15 nejvíce virálních hashtagů pro rok 2025 v oblasti realit a investic v ČR a globálně)
-                    """
-                    
-                    response = model.generate_content([prompt, image])
-                    
-                    st.success("Generování dokončeno!")
-                    st.markdown("---")
-                    st.markdown(response.text)
-                    
-                except Exception as e:
-                    st.error(f"Nastala chyba: {e}")
+    # Hlavní layout
+    st.title("Nová kampaň")
+    
+    col_left, col_right = st.columns([1, 1.5], gap="large")
+
+    with col_left:
+        st.markdown("#### 1. Vstupní data")
+        with st.container(border=True):
+            uploaded_file = st.file_uploader("Nahrajte fotografii", type=["jpg", "png", "jpeg"])
+            if uploaded_file:
+                st.image(uploaded_file, use_column_width=True, caption="Náhled nemovitosti")
+    
+    with col_right:
+        st.markdown("#### 2. Cílení a parametry")
+        with st.container(border=True):
+            c1, c2 = st.columns(2)
+            with c1:
+                nemovitost = st.selectbox("Typ", ["Byt", "Dům", "Komerce", "Pozemek"])
+                cena = st.text_input("Cena", placeholder="25.000.000 CZK")
+            with c2:
+                lokalita = st.text_input("Lokalita", placeholder="Praha - Vinohrady")
+                ton = st.selectbox("Tón", ["Luxusní & Emoční", "Věcný & Profesionální", "Urgentní & Investiční"])
+            
+            features = st.text_area("Klíčové benefity (oddělte čárkou)", placeholder="Terasa, parkování, výhled, po rekonstrukci...")
+            
+            generate = st.button("✨ Vygenerovat kampaň", type="primary", use_container_width=True)
+
+    # VÝSLEDKY
+    if generate:
+        if not api_key:
+            st.warning("⚠️ Pro generování vložte prosím API klíč v levém menu.")
+            return
+
+        # Logika AI
+        genai.configure(api_key=api_key)
+        # Auto-select best model logic
+        model_name = 'gemini-1.5-flash' # Fallback
+        try:
+            for m in genai.list_models():
+                if 'generateContent' in m.supported_generation_methods and 'flash' in m.name:
+                    model_name = m.name
+        except:
+            pass
+            
+        model = genai.GenerativeModel(model_name)
+
+        with st.spinner("Analyzuji obraz a píšu texty..."):
+            try:
+                prompt = f"""
+                Jsi senior marketing strategist. Vytvoř kampaň pro: {nemovitost}, {lokalita}, {cena}.
+                Vlastnosti: {features}. Tón: {ton}.
+                
+                Výstup strukturovaně:
+                1. Nadpis (Catchy)
+                2. Popis pro web (Sreality/Reas)
+                3. Social Media Post (Instagram/TikTok)
+                4. Hashtagy
+                """
+                response = model.generate_content([prompt, Image.open(uploaded_file)])
+                
+                st.markdown("---")
+                st.subheader("🚀 Výsledek kampaně")
+                st.info("Texty jsou připraveny k okamžitému použití.")
+                st.markdown(response.text)
+            except Exception as e:
+                st.error(f"Chyba: {e}")
+
+# --- 6. MAIN ROUTER ---
+if st.session_state.page == 'landing':
+    show_landing_page()
+elif st.session_state.page == 'login':
+    show_login_page()
+elif st.session_state.page == 'app':
+    if st.session_state.authenticated:
+        show_app_page()
+    else:
+        navigate_to('login')
