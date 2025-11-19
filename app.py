@@ -18,6 +18,15 @@ st.markdown("""
         color: #E2E8F0;
     }
     
+    /* STYLOVÁNÍ OBRÁZKŮ GLOBÁLNĚ (Místo chybného parametru style) */
+    img {
+        border-radius: 15px;
+        transition: transform 0.3s ease;
+    }
+    img:hover {
+        transform: scale(1.01);
+    }
+    
     /* SKRYTÍ PRVKŮ */
     #MainMenu, footer, header {visibility: hidden;}
 
@@ -100,13 +109,14 @@ def show_landing():
         with c1:
             if st.button("🚀 VYZKOUŠET ZDARMA"): nav('login')
         with c2:
+            # Použití prázdného kontejneru pro zarovnání tlačítka, styl řešen přes CSS
             st.markdown("<div class='secondary-btn'>", unsafe_allow_html=True)
             if st.button("DEMO UKÁZKA"): nav('login')
             st.markdown("</div>", unsafe_allow_html=True)
             
     with col2:
-        # Vizuál dashboardu
-        st.image("https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2053&auto=format&fit=crop", caption="Analyzováno AI Enginem 3.0", style="border-radius: 20px; opacity: 0.8;")
+        # Vizuál dashboardu (OPRAVENO: Odstraněn parametr style, který způsoboval chybu)
+        st.image("https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2053&auto=format&fit=crop", caption="Analyzováno AI Enginem 3.0")
 
     # -- SOCIAL PROOF --
     st.markdown("""
@@ -278,7 +288,7 @@ def show_app():
         uploaded_file = st.file_uploader("Nahrajte fotografii", type=["jpg", "jpeg", "png"])
         
         if uploaded_file:
-            st.image(uploaded_file, caption="Analýza obrazu...", use_column_width=True, style="border-radius:10px;")
+            st.image(uploaded_file, caption="Analýza obrazu...", use_column_width=True)
         
         st.markdown("#### 2. Parametry kampaně")
         typ = st.selectbox("Typ nemovitosti", ["Luxusní apartmán", "Rodinný dům", "Investiční byt", "Komerční prostor"])
